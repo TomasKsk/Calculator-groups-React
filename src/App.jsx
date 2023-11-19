@@ -1,12 +1,34 @@
-import { useState } from 'react'
+import { useState, useEffect, setState } from 'react'
 import './App.css'
 
 export default function App() {
+  const [calcMem, setCalcMem] = useState([]);
+  const [calcDisp, setCalcDisp] = useState('');
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      console.log(e.target)
+      let num = +(e.target.textContent);
+      if (!isNaN(num) && typeof num === 'number') {
+        setCalcDisp((prevDisp) => prevDisp + num);
+      }
+    }
+
+    const sel = document.querySelector('.container');
+    sel.addEventListener('click', handleClick);
+    return () => {
+      sel.removeEventListener('click', handleClick);
+      console.log('number', calcDisp);
+    }
+  }, []);
+
+
 
   return (
     <div id="calc-main" className='calc-grid'>
-      <CalcDisplay />
+      <CalcDisplay calcDisp={calcDisp}/>
       <CalcKeys />
+      <CalcMemory />
     </div>
   )
 }
@@ -36,13 +58,22 @@ const CalcKeys = () => {
   )
 };
 
-const CalcDisplay = () => {
+// eslint-disable-next-line react/prop-types
+const CalcDisplay = ({ calcDisp }) => {
   return(
     <div className="calc-display">
         <div id="menu-icon-place" className="storage-window"></div>
-        <div className="calc-current"></div>
+        <div className="calc-current">{calcDisp}</div>
         <div className="calc-mem"></div>
-        <div className="save-button hide"><span id="save-icon-place" style={{fontFamily: 'wingdings'}}></span></div>
+        <div className="save-button hide saveIcon"><span id="save-icon-place"></span></div>
+    </div>
+  )
+}
+
+const CalcMemory = () => {
+  return(
+    <div id="calc-mem-storage" className="calc-mem-storage">
+    
     </div>
   )
 }

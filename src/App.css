@@ -170,3 +170,7 @@ h3 {
   left: 8%;
   transition: 1s;
 }
+
+.saveIcon {
+  font-family: 'wingdings'
+}
