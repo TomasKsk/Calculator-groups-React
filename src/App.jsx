@@ -7,11 +7,19 @@ export default function App() {
 
   useEffect(() => {
     const handleClick = (e) => {
-      console.log(e.target)
-      let num = +(e.target.textContent);
-      if (!isNaN(num) && typeof num === 'number') {
+      // console.log(e.target)
+      let num = e.target.innerHTML;
+
+      // if afer parsing the content to number is not NaN or typeof is number concat the text;
+      if (!isNaN(+(num)) && typeof +(num) === 'number') {
         setCalcDisp((prevDisp) => prevDisp + num);
       }
+
+      console.log(calcDisp, !(/./).test(calcDisp))
+      if (num === '.' && !calcDisp.includes('.')) {
+        setCalcDisp((prevDisp) => prevDisp + num);
+      }
+
     }
 
     const sel = document.querySelector('.container');
@@ -20,7 +28,7 @@ export default function App() {
       sel.removeEventListener('click', handleClick);
       console.log('number', calcDisp);
     }
-  }, []);
+  }, [calcDisp]);
 
 
 
