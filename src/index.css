@@ -1,0 +1,24 @@
+*, *::before, *::after {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-weight: 400;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 4% auto;
+  height: 86vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  letter-spacing: 5px;
+}
+
+.container {
+  position: relative;
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+  height: 100%;
+  max-width: 450px;
+  background-color: white;
+}
