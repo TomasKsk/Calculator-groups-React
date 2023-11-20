@@ -20,16 +20,27 @@ export default function App() {
         handleOperandClick(num);
       } else if (num === '=') {
         handleEqualClick();
+      } else if (num === 'C' || num === 'CE') {
+        handleDel(num);
       }
     };
 
     const handleNumberClick = (num) => {
+      const delKey = document.querySelector('#AC-key');
       if (!calcMem.includes('=')) {
         setCalcDisp((prevDisp) => prevDisp + num);
         if (calcOp !== '') {
           setCalcOp('');
         }
+        if (delKey.innerHTML === 'CE') {
+          console.log('setting C')
+          delKey.innerHTML = 'C'
+        }
       } else {
+        if (delKey === 'CE') {
+          console.log('setting C')
+          delKey.innerHTML = 'C'
+        }
         setCalcDisp('');
         setCalcMem([]);
         setCalcDisp((prevDisp) => prevDisp + num);
@@ -65,6 +76,23 @@ export default function App() {
         let tempDisp = recalc(tempMem);
         setCalcMem((prev) => [...prev, calcDisp, '=', tempDisp]);
         setCalcDisp(tempDisp);
+      }
+    };
+
+    const handleDel = (operand) => {
+      const delKey = document.querySelector('#AC-key');
+      if (operand === 'C' && calcDisp !== '') {
+        setCalcDisp('');
+        if (calcMem.length > 0) {
+          delKey.innerHTML = 'CE';
+        }
+      } else if (operand === 'CE') {
+        if (calcDisp !== '') {
+          delKey.innerHTML = 'C';
+        } else {
+          setCalcMem([]);
+          delKey.innerHTML = 'C';
+        }
       }
     };
 
