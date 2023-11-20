@@ -10,60 +10,61 @@ export default function App() {
 
   useEffect(() => {
     const handleClick = (e) => {
-      // console.log(e.target)
       let num = e.target.innerHTML;
 
-      // if afer parsing the content to number is not NaN or typeof is number concat the text; user input: 7
       if (!isNaN(+(num)) && typeof +(num) === 'number') {
-        // if there is not a finished calculation
-        if (!calcMem.includes('=')) {
-          setCalcDisp((prevDisp) => prevDisp + num);
-          // reset the operand if there is any
-          if (calcOp !== '') {
-            setCalcOp('');
-          }
-        } else {
-          setCalcDisp('');
-          setCalcMem([]);
-          setCalcDisp((prevDisp) => prevDisp + num);
-        }
-
+        handleNumberClick(num);
+      } else if (num === '.') {
+        handleDotClick();
+      } else if (operandArr.includes(num)) {
+        handleOperandClick(num);
+      } else if (num === '=') {
+        handleEqualClick();
       }
+    };
 
-      // if user uses a comma, it has to be only once per the whole number; user input: .
-      if (num === '.' && !calcDisp.includes('.')) {
+    const handleNumberClick = (num) => {
+      if (!calcMem.includes('=')) {
+        setCalcDisp((prevDisp) => prevDisp + num);
+        if (calcOp !== '') {
+          setCalcOp('');
+        }
+      } else {
+        setCalcDisp('');
+        setCalcMem([]);
         setCalcDisp((prevDisp) => prevDisp + num);
       }
+    };
 
-      // if user clicks on a operand; user input: +
-      if (operandArr.includes(num)) {
-        console.log(num)
-        // if the display has a number
-        if (calcDisp !== '') {
-          // if calcmem includes =
-          if (calcMem.includes('=')) {
-            setCalcOp(num);
-            setCalcMem([calcDisp, num]);
-            setCalcDisp('');
-          } else {
-            setCalcOp(num);
-            setCalcMem((prev) => [...prev, calcDisp, num]);
-            setCalcDisp('');
-          }
-            
+    const handleDotClick = () => {
+      if (!calcDisp.includes('.')) {
+        setCalcDisp((prevDisp) => prevDisp + '.');
+      }
+    };
+
+    const handleOperandClick = (num) => {
+      if (calcDisp !== '') {
+        if (calcMem.includes('=')) {
+          setCalcOp(num);
+          setCalcMem([calcDisp, num]);
+          setCalcDisp('');
         } else {
           setCalcOp(num);
-          setCalcMem((prev) => [...prev.slice(0,-1), num]);
+          setCalcMem((prev) => [...prev, calcDisp, num]);
+          setCalcDisp('');
         }
+      } else {
+        setCalcOp(num);
+        setCalcMem((prev) => [...prev.slice(0, -1), num]);
       }
+    };
 
-      if (num === '=') {
-        if (calcDisp !== '' && calcMem.length > 1) {
-          let tempMem = [...calcMem, calcDisp];
-          let tempDisp = recalc(tempMem);
-          setCalcMem((prev) => [...prev, calcDisp, '=', tempDisp]);
-          setCalcDisp(tempDisp);
-        }
+    const handleEqualClick = () => {
+      if (calcDisp !== '' && calcMem.length > 1) {
+        let tempMem = [...calcMem, calcDisp];
+        let tempDisp = recalc(tempMem);
+        setCalcMem((prev) => [...prev, calcDisp, '=', tempDisp]);
+        setCalcDisp(tempDisp);
       }
     };
 
