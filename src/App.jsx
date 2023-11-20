@@ -4,6 +4,7 @@ const operandArr = ["÷", "x", "-", "+"];
 
 export default function App() {
   const [calcMem, setCalcMem] = useState([]);
+  const [calcStorage, setCalcStorage] = useState({});
   const [calcDisp, setCalcDisp] = useState('');
   const [calcOp, setCalcOp] = useState('')
 
@@ -14,10 +15,18 @@ export default function App() {
 
       // if afer parsing the content to number is not NaN or typeof is number concat the text; user input: 7
       if (!isNaN(+(num)) && typeof +(num) === 'number') {
-        setCalcDisp((prevDisp) => prevDisp + num);
-        if (calcOp !== '') {
-          setCalcOp('');
+        if (!calcMem.includes('=')) {
+          setCalcDisp((prevDisp) => prevDisp + num);
+          // reset the operand if there is any
+          if (calcOp !== '') {
+            setCalcOp('');
+          }
+        } else {
+          setCalcDisp('');
+          setCalcMem([]);
+          setCalcDisp((prevDisp) => prevDisp + num);
         }
+
       }
 
       // if user uses a comma, it has to be only once per the whole number; user input: .
@@ -38,13 +47,44 @@ export default function App() {
           setCalcMem((prev) => [...prev.slice(0,-1), num]);
         }
       }
-    }
+
+      if (num === '=') {
+        if (calcDisp !== '' && calcMem.length > 1) {
+          let tempMem = [...calcMem, calcDisp];
+          let tempDisp = recalc(tempMem);
+          setCalcMem((prev) => [...prev, calcDisp, '=', tempDisp]);
+          setCalcDisp(tempDisp);
+        }
+      }
+    };
+
+    const parseOp = (num1, op, num2) => {
+      num1 = +(num1);
+      num2 = +(num2);
+      if (op === '+') return num1 + num2;
+      if (op === '-') return num1 - num2;
+      if (op === 'x' || op === '*') return num1 * num2;
+      if (op === '÷' || op === '/') return num1 / num2;
+    };
+
+    const recalc = (arr) => {
+      let temp2 = [].concat(arr);
+      let temp = parseOp(temp2[0], temp2[1], temp2[2]);
+      console.log(temp2, temp)
+      temp2.splice(0,3)
+  
+      while(temp2.length > 0 && temp2[0] !== '=') {
+          let cur = temp2.splice(0,2);
+          console.log(cur);
+          temp = parseOp(temp, cur[0], cur[1]);
+      }
+      return temp;
+    };
 
     const sel = document.querySelector('.container');
     sel.addEventListener('click', handleClick);
     return () => {
       sel.removeEventListener('click', handleClick);
-      console.log('number', calcDisp, calcMem);
     }
   }, [calcDisp, calcMem, calcOp]);
 
