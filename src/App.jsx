@@ -15,6 +15,7 @@ export default function App() {
 
       // if afer parsing the content to number is not NaN or typeof is number concat the text; user input: 7
       if (!isNaN(+(num)) && typeof +(num) === 'number') {
+        // if there is not a finished calculation
         if (!calcMem.includes('=')) {
           setCalcDisp((prevDisp) => prevDisp + num);
           // reset the operand if there is any
@@ -39,9 +40,17 @@ export default function App() {
         console.log(num)
         // if the display has a number
         if (calcDisp !== '') {
+          // if calcmem includes =
+          if (calcMem.includes('=')) {
+            setCalcOp(num);
+            setCalcMem([calcDisp, num]);
+            setCalcDisp('');
+          } else {
             setCalcOp(num);
             setCalcMem((prev) => [...prev, calcDisp, num]);
             setCalcDisp('');
+          }
+            
         } else {
           setCalcOp(num);
           setCalcMem((prev) => [...prev.slice(0,-1), num]);
@@ -70,14 +79,14 @@ export default function App() {
     const recalc = (arr) => {
       let temp2 = [].concat(arr);
       let temp = parseOp(temp2[0], temp2[1], temp2[2]);
-      console.log(temp2, temp)
+      console.log(temp2);
       temp2.splice(0,3)
   
       while(temp2.length > 0 && temp2[0] !== '=') {
           let cur = temp2.splice(0,2);
-          console.log(cur);
           temp = parseOp(temp, cur[0], cur[1]);
       }
+      console.log(temp);
       return temp;
     };
 
