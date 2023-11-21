@@ -1,10 +1,11 @@
-import { useState, useEffect, setState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 const operandArr = ["÷", "x", "-", "+"];
 
 export default function App() {
   const [calcMem, setCalcMem] = useState([]);
   const [calcStorage, setCalcStorage] = useState({});
+  const [saveIco, setSaveIco] = useState('');
   const [calcDisp, setCalcDisp] = useState('');
   const [calcOp, setCalcOp] = useState('');
   const [delKey, setDelKey] = useState('C');
@@ -26,6 +27,11 @@ export default function App() {
       }
     };
 
+    // remove save icon if there is no 
+    if (!calcMem.includes('=')) {
+      setSaveIco('')
+    }
+
     const handleNumberClick = (num) => {
       if (!calcMem.includes('=')) {
         setCalcDisp((prevDisp) => prevDisp + num);
@@ -36,6 +42,9 @@ export default function App() {
           setDelKey('C');
         }
       } else {
+        if (delKey === 'CE') {
+          setDelKey('C');
+        }
         setCalcDisp('');
         setCalcMem([]);
         setCalcDisp((prevDisp) => prevDisp + num);
@@ -71,6 +80,7 @@ export default function App() {
         let tempDisp = recalc(tempMem);
         setCalcMem((prev) => [...prev, calcDisp, '=', tempDisp]);
         setCalcDisp(tempDisp);
+        setSaveIco('<');
       }
     };
 
@@ -117,19 +127,20 @@ export default function App() {
     return () => {
       sel.removeEventListener('click', handleClick);
     }
-  }, [calcDisp, calcMem, calcOp, delKey]);
+  }, [calcDisp, calcMem, calcOp, delKey, saveIco]);
 
 
 
   return (
     <div id="calc-main" className='calc-grid'>
-      <CalcDisplay calcDisp={calcDisp} calcMem={calcMem}/>
+      <CalcDisplay saveIco={saveIco} calcDisp={calcDisp} calcMem={calcMem}/>
       <CalcKeys delKey={delKey}/>
       <CalcMemory />
     </div>
   )
 }
 
+// eslint-disable-next-line react/prop-types
 const CalcKeys = ({ delKey }) => {
 
   return(
@@ -156,13 +167,13 @@ const CalcKeys = ({ delKey }) => {
 };
 
 // eslint-disable-next-line react/prop-types
-const CalcDisplay = ({ calcDisp, calcMem }) => {
+const CalcDisplay = ({ calcDisp, calcMem, saveIco }) => {
   return(
     <div className="calc-display">
         <div id="menu-icon-place" className="storage-window"></div>
         <div className="calc-current">{calcDisp}</div>
         <div className="calc-mem">{calcMem}</div>
-        <div className="save-button hide saveIcon"><span id="save-icon-place"></span></div>
+        <div className="save-button saveIcon">{saveIco}<span id="save-icon-place"></span></div>
     </div>
   )
 }
