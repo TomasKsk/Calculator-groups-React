@@ -11,6 +11,7 @@ export default function App() {
   const [calcDisp, setCalcDisp] = useState('');
   const [calcOp, setCalcOp] = useState('');
   const [delKey, setDelKey] = useState('C');
+  const memoryWindow = document.querySelector('.calc-mem-storage');
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -18,11 +19,11 @@ export default function App() {
       let numId = e.target.id;
 
       if (!isNaN(+(num)) && typeof +(num) === 'number') {
-        handleNumberClick(num);
+        handleNumberClick(num, e);
       } else if (num === '.') {
         handleDotClick();
       } else if (operandArr.includes(num) && calcDisp !== '' && numId !== 'menu-icon-place') {
-        handleOperandClick(num);
+        handleOperandClick(num, e);
       } else if (num === '=') {
         handleEqualClick();
       } else if (num === 'C' || num === 'CE') {
@@ -32,6 +33,7 @@ export default function App() {
       } else if (numId === 'menu-icon-place') {
         if (num === '≡' || num === 'x') {
           setMenuIcon((prev) => (prev === '≡') ? 'x' : '≡');
+          memoryWindow.classList.toggle('visible');
         }
       }
     };
@@ -41,22 +43,25 @@ export default function App() {
       setSaveIco('')
     }
 
-    const handleNumberClick = (num) => {
-      if (!calcMem.includes('=')) {
-        setCalcDisp((prevDisp) => prevDisp + num);
-        if (calcOp !== '') {
-          setCalcOp('');
+    const handleNumberClick = (num, e) => {
+      console.log(e.target.matches('button'))
+      if (e.target.matches('button')) {
+        if (!calcMem.includes('=')) {
+          setCalcDisp((prevDisp) => prevDisp + num);
+          if (calcOp !== '') {
+            setCalcOp('');
+          }
+          if (delKey === 'CE') {
+            setDelKey('C');
+          }
+        } else {
+          if (delKey === 'CE') {
+            setDelKey('C');
+          }
+          setCalcDisp('');
+          setCalcMem([]);
+          setCalcDisp((prevDisp) => prevDisp + num);
         }
-        if (delKey === 'CE') {
-          setDelKey('C');
-        }
-      } else {
-        if (delKey === 'CE') {
-          setDelKey('C');
-        }
-        setCalcDisp('');
-        setCalcMem([]);
-        setCalcDisp((prevDisp) => prevDisp + num);
       }
     };
 
@@ -66,20 +71,22 @@ export default function App() {
       }
     };
 
-    const handleOperandClick = (num) => {
-      if (calcDisp !== '') {
-        if (calcMem.includes('=')) {
-          setCalcOp(num);
-          setCalcMem([calcDisp, num]);
-          setCalcDisp('');
+    const handleOperandClick = (num, e) => {
+      if (e.target.matches('button')) {
+        if (calcDisp !== '') {
+          if (calcMem.includes('=')) {
+            setCalcOp(num);
+            setCalcMem([calcDisp, num]);
+            setCalcDisp('');
+          } else {
+            setCalcOp(num);
+            setCalcMem((prev) => [...prev, calcDisp, num]);
+            setCalcDisp('');
+          }
         } else {
           setCalcOp(num);
-          setCalcMem((prev) => [...prev, calcDisp, num]);
-          setCalcDisp('');
+          setCalcMem((prev) => [...prev.slice(0, -1), num]);
         }
-      } else {
-        setCalcOp(num);
-        setCalcMem((prev) => [...prev.slice(0, -1), num]);
       }
     };
 
@@ -162,7 +169,7 @@ export default function App() {
 
   return (
     <div id="calc-main" className='calc-grid'>
-      <CalcMemory />
+      <CalcMemory calcGenStorage={calcStorage}/>
       <CalcDisplay saveIco={saveIco} calcDisp={calcDisp} calcMem={calcMem} menuIcon={menuIcon} />
       <CalcKeys delKey={delKey}/>
     </div>
@@ -207,10 +214,34 @@ const CalcDisplay = ({ calcDisp, calcMem, saveIco, menuIcon }) => {
   )
 }
 
-const CalcMemory = () => {
+const CalcMemory = ( { calcGenStorage } ) => {
   return(
     <div id="calc-mem-storage" className="calc-mem-storage">
-    
+      {
+        Object.entries(calcGenStorage).map(([key, { calculation, comments, name }]) => (
+          <div className='storage-item' key={key} id={key}>
+            <div>
+              <h3>
+                <span data-idarent={key} className="editable">{ name }</span> 
+                <button className="delete-mem">x</button>
+              </h3>
+            </div>
+            {calculation.map((a,b) => (
+              <div key={b}>
+                <strong>
+                  <span className="editable" data-idparent={key} data-index={b}>
+                    {a}
+                  </span>
+                </strong>
+                <span className="editable" data-idparent={key} data-index={b}>
+                  {comments[b]}
+                </span>
+              </div>
+            ))}
+
+          </div>
+        ))
+      }
     </div>
   )
 }
