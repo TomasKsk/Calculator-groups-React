@@ -5,6 +5,7 @@ const operandArr = ["÷", "x", "-", "+"];
 export default function App() {
   const [calcMem, setCalcMem] = useState([]);
   const [calcStorage, setCalcStorage] = useState({});
+  const [calcMemCount, setCalcMemCount] = useState(0);
   const [saveIco, setSaveIco] = useState('');
   const [calcDisp, setCalcDisp] = useState('');
   const [calcOp, setCalcOp] = useState('');
@@ -13,6 +14,7 @@ export default function App() {
   useEffect(() => {
     const handleClick = (e) => {
       let num = e.target.innerHTML;
+      let numId = e.target.id;
 
       if (!isNaN(+(num)) && typeof +(num) === 'number') {
         handleNumberClick(num);
@@ -24,12 +26,30 @@ export default function App() {
         handleEqualClick();
       } else if (num === 'C' || num === 'CE') {
         handleDel(num);
+      } else if (numId === 'save-icon-place') {
+        saveCalc();
       }
     };
 
     // remove save icon if there is no 
     if (!calcMem.includes('=')) {
       setSaveIco('')
+    }
+
+    const saveCalc = () => {
+      let name = `calc_${calcMemCount}`;
+      let newCalc = calcMem.map(a => (typeof +(a) == 'number' && !isNaN(a)) ? +(a) : a);
+      setCalcStorage((prev) => ({
+        ...prev,
+        [name]: {
+          'calculation': newCalc,
+          'comments': newCalc.slice(0,-2).map(a => (typeof a == 'number' && a !== '=') ? '...' : null).concat(null, null),
+          'name': name
+        }
+      }));
+      setCalcMemCount((prev) => prev + 1);
+      setSaveIco('');
+      setCalcMem([]);
     }
 
     const handleNumberClick = (num) => {
@@ -124,12 +144,16 @@ export default function App() {
 
     const sel = document.querySelector('.container');
     sel.addEventListener('click', handleClick);
+
     return () => {
       sel.removeEventListener('click', handleClick);
     }
-  }, [calcDisp, calcMem, calcOp, delKey, saveIco]);
+    
+  }, [calcDisp, calcMem, calcOp, delKey, saveIco, calcStorage, calcMemCount]);
 
-
+  useEffect(() => {
+    console.log(calcStorage);
+  }, [calcStorage]);
 
   return (
     <div id="calc-main" className='calc-grid'>
@@ -173,7 +197,7 @@ const CalcDisplay = ({ calcDisp, calcMem, saveIco }) => {
         <div id="menu-icon-place" className="storage-window"></div>
         <div className="calc-current">{calcDisp}</div>
         <div className="calc-mem">{calcMem}</div>
-        <div className="save-button saveIcon">{saveIco}<span id="save-icon-place"></span></div>
+        <div><span className="save-button saveIcon" id="save-icon-place">{saveIco}</span></div>
     </div>
   )
 }
