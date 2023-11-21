@@ -70,7 +70,8 @@
 }
 
 .calc-mem-storage {
-  position: relative;
+  position: absolute;
+  z-index: 2;
   left: -100%;
   overflow: scroll;
   display: flex;

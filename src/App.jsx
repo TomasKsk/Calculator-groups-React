@@ -6,6 +6,7 @@ export default function App() {
   const [calcMem, setCalcMem] = useState([]);
   const [calcStorage, setCalcStorage] = useState({});
   const [calcMemCount, setCalcMemCount] = useState(0);
+  const [menuIcon, setMenuIcon] = useState('≡');
   const [saveIco, setSaveIco] = useState('');
   const [calcDisp, setCalcDisp] = useState('');
   const [calcOp, setCalcOp] = useState('');
@@ -20,7 +21,7 @@ export default function App() {
         handleNumberClick(num);
       } else if (num === '.') {
         handleDotClick();
-      } else if (operandArr.includes(num)) {
+      } else if (operandArr.includes(num) && calcDisp !== '' && numId !== 'menu-icon-place') {
         handleOperandClick(num);
       } else if (num === '=') {
         handleEqualClick();
@@ -28,28 +29,16 @@ export default function App() {
         handleDel(num);
       } else if (numId === 'save-icon-place') {
         saveCalc();
+      } else if (numId === 'menu-icon-place') {
+        if (num === '≡' || num === 'x') {
+          setMenuIcon((prev) => (prev === '≡') ? 'x' : '≡');
+        }
       }
     };
 
     // remove save icon if there is no 
     if (!calcMem.includes('=')) {
       setSaveIco('')
-    }
-
-    const saveCalc = () => {
-      let name = `calc_${calcMemCount}`;
-      let newCalc = calcMem.map(a => (typeof +(a) == 'number' && !isNaN(a)) ? +(a) : a);
-      setCalcStorage((prev) => ({
-        ...prev,
-        [name]: {
-          'calculation': newCalc,
-          'comments': newCalc.slice(0,-2).map(a => (typeof a == 'number' && a !== '=') ? '...' : null).concat(null, null),
-          'name': name
-        }
-      }));
-      setCalcMemCount((prev) => prev + 1);
-      setSaveIco('');
-      setCalcMem([]);
     }
 
     const handleNumberClick = (num) => {
@@ -142,6 +131,22 @@ export default function App() {
       return temp;
     };
 
+    const saveCalc = () => {
+      let name = `calc_${calcMemCount}`;
+      let newCalc = calcMem.map(a => (typeof +(a) == 'number' && !isNaN(a)) ? +(a) : a);
+      setCalcStorage((prev) => ({
+        ...prev,
+        [name]: {
+          'calculation': newCalc,
+          'comments': newCalc.slice(0,-2).map(a => (typeof a == 'number' && a !== '=') ? '...' : null).concat(null, null),
+          'name': name
+        }
+      }));
+      setCalcMemCount((prev) => prev + 1);
+      setSaveIco('');
+      setCalcMem([]);
+    };
+
     const sel = document.querySelector('.container');
     sel.addEventListener('click', handleClick);
 
@@ -157,9 +162,9 @@ export default function App() {
 
   return (
     <div id="calc-main" className='calc-grid'>
-      <CalcDisplay saveIco={saveIco} calcDisp={calcDisp} calcMem={calcMem}/>
-      <CalcKeys delKey={delKey}/>
       <CalcMemory />
+      <CalcDisplay saveIco={saveIco} calcDisp={calcDisp} calcMem={calcMem} menuIcon={menuIcon} />
+      <CalcKeys delKey={delKey}/>
     </div>
   )
 }
@@ -191,10 +196,10 @@ const CalcKeys = ({ delKey }) => {
 };
 
 // eslint-disable-next-line react/prop-types
-const CalcDisplay = ({ calcDisp, calcMem, saveIco }) => {
+const CalcDisplay = ({ calcDisp, calcMem, saveIco, menuIcon }) => {
   return(
     <div className="calc-display">
-        <div id="menu-icon-place" className="storage-window"></div>
+        <div id="menu-icon-place" className="storage-window">{menuIcon}</div>
         <div className="calc-current">{calcDisp}</div>
         <div className="calc-mem">{calcMem}</div>
         <div><span className="save-button saveIcon" id="save-icon-place">{saveIco}</span></div>
