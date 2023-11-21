@@ -6,7 +6,8 @@ export default function App() {
   const [calcMem, setCalcMem] = useState([]);
   const [calcStorage, setCalcStorage] = useState({});
   const [calcDisp, setCalcDisp] = useState('');
-  const [calcOp, setCalcOp] = useState('')
+  const [calcOp, setCalcOp] = useState('');
+  const [delKey, setDelKey] = useState('C');
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -26,21 +27,15 @@ export default function App() {
     };
 
     const handleNumberClick = (num) => {
-      const delKey = document.querySelector('#AC-key');
       if (!calcMem.includes('=')) {
         setCalcDisp((prevDisp) => prevDisp + num);
         if (calcOp !== '') {
           setCalcOp('');
         }
-        if (delKey.innerHTML === 'CE') {
-          console.log('setting C')
-          delKey.innerHTML = 'C'
+        if (delKey === 'CE') {
+          setDelKey('C');
         }
       } else {
-        if (delKey === 'CE') {
-          console.log('setting C')
-          delKey.innerHTML = 'C'
-        }
         setCalcDisp('');
         setCalcMem([]);
         setCalcDisp((prevDisp) => prevDisp + num);
@@ -80,18 +75,16 @@ export default function App() {
     };
 
     const handleDel = (operand) => {
-      const delKey = document.querySelector('#AC-key');
       if (operand === 'C' && calcDisp !== '') {
         setCalcDisp('');
-        if (calcMem.length > 0) {
-          delKey.innerHTML = 'CE';
-        }
+        setDelKey(calcMem.length > 0 ? 'CE' : 'C');
       } else if (operand === 'CE') {
         if (calcDisp !== '') {
-          delKey.innerHTML = 'C';
+          setCalcDisp('');
+          setDelKey('CE');
         } else {
           setCalcMem([]);
-          delKey.innerHTML = 'C';
+          setDelKey('C');
         }
       }
     };
@@ -124,20 +117,20 @@ export default function App() {
     return () => {
       sel.removeEventListener('click', handleClick);
     }
-  }, [calcDisp, calcMem, calcOp]);
+  }, [calcDisp, calcMem, calcOp, delKey]);
 
 
 
   return (
     <div id="calc-main" className='calc-grid'>
       <CalcDisplay calcDisp={calcDisp} calcMem={calcMem}/>
-      <CalcKeys />
+      <CalcKeys delKey={delKey}/>
       <CalcMemory />
     </div>
   )
 }
 
-const CalcKeys = () => {
+const CalcKeys = ({ delKey }) => {
 
   return(
     <div className="calc-keys">
@@ -156,7 +149,7 @@ const CalcKeys = () => {
       <button>3</button>
       <button>0</button>
       <button className="op5">.</button>
-      <button id="AC-key" className="op6">C</button>
+      <button id="AC-key" className="op6">{delKey}</button>
       <button className="op7">=</button>
     </div>
   )
