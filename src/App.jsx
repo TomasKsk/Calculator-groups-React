@@ -11,12 +11,12 @@ export default function App() {
   const [calcDisp, setCalcDisp] = useState('');
   const [calcOp, setCalcOp] = useState('');
   const [delKey, setDelKey] = useState('C');
-  const memoryWindow = document.querySelector('.calc-mem-storage');
 
   useEffect(() => {
     const handleClick = (e) => {
       let num = e.target.innerHTML;
       let numId = e.target.id;
+      console.log(e.target)
 
       if (!isNaN(+(num)) && typeof +(num) === 'number') {
         handleNumberClick(num, e);
@@ -32,8 +32,10 @@ export default function App() {
         saveCalc();
       } else if (numId === 'menu-icon-place') {
         if (num === '≡' || num === 'x') {
-          setMenuIcon((prev) => (prev === '≡') ? 'x' : '≡');
-          memoryWindow.classList.toggle('visible');
+          let sel = document.querySelector('.calc-mem-storage')
+          let condi = sel !== null;
+          setMenuIcon((prev) => (prev === '≡' && condi) ? 'x' : '≡');
+          if (condi) return sel.classList.toggle('visible');
         }
       }
     };
@@ -152,6 +154,7 @@ export default function App() {
       setCalcMemCount((prev) => prev + 1);
       setSaveIco('');
       setCalcMem([]);
+      setCalcDisp('')
     };
 
     const sel = document.querySelector('.container');
@@ -222,22 +225,33 @@ const CalcMemory = ( { calcGenStorage } ) => {
           <div className='storage-item' key={key} id={key}>
             <div>
               <h3>
-                <span data-idarent={key} className="editable">{ name }</span> 
+                <span data-type="header" data-idparent={key} className="editable">{ name }</span> 
                 <button className="delete-mem">x</button>
               </h3>
             </div>
-            {calculation.map((a,b) => (
-              <div key={b}>
-                <strong>
-                  <span className="editable" data-idparent={key} data-index={b}>
-                    {a}
-                  </span>
-                </strong>
-                <span className="editable" data-idparent={key} data-index={b}>
-                  {comments[b]}
+            {calculation.map((a,b) => {
+              if (typeof a === 'number') {
+                return (
+                  <div key={b}>
+                    <strong>
+                      <span className="editable" data-type="number" data-idparent={key} data-index={b}>
+                        {a}
+                      </span>
+                    </strong>
+                    <span className="editable" data-type="comment" data-idparent={key} data-index={b}>
+                      {comments[b]}
+                    </span>
+                  </div>
+                )
+              } else {
+                return (
+                <span key={b} className="editable" data-type="operator" data-idparent={key} data-index={b}>
+                  {a}
                 </span>
-              </div>
-            ))}
+                )
+              }
+
+            })}
 
           </div>
         ))
