@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 const operandArr = ["÷", "x", "-", "+"];
+const dataTypes = ['header', 'number', 'comment', 'operator', 'deleteButton'];
 
 export default function App() {
   const [calcMem, setCalcMem] = useState([]);
@@ -16,8 +17,11 @@ export default function App() {
     const handleClick = (e) => {
       let num = e.target.innerHTML;
       let numId = e.target.id;
-      console.log(e.target)
+      let dataT = e.target.dataset;
 
+      if (dataT.type) {
+        handleStorage(e);
+      } 
       if (!isNaN(+(num)) && typeof +(num) === 'number') {
         handleNumberClick(num, e);
       } else if (num === '.') {
@@ -31,18 +35,35 @@ export default function App() {
       } else if (numId === 'save-icon-place') {
         saveCalc();
       } else if (numId === 'menu-icon-place') {
-        if (num === '≡' || num === 'x') {
-          let sel = document.querySelector('.calc-mem-storage')
-          let condi = sel !== null;
-          setMenuIcon((prev) => (prev === '≡' && condi) ? 'x' : '≡');
-          if (condi) return sel.classList.toggle('visible');
-        }
-      }
+        handleMenu(e);
+      } 
     };
 
     // remove save icon if there is no 
     if (!calcMem.includes('=')) {
       setSaveIco('')
+    }
+
+    const selectMe = (e) => {
+      e.target.setAttribute('contenteditable', true);
+      document.execCommand('selectAll',false,null);
+    }
+
+    const handleStorage = (e) => {
+      let dataT = e.target.dataset.type;
+      if (dataT === 'header') {
+        selectMe(e)
+      }
+    }
+
+    const handleMenu = (e) => {
+      let sel = e.target.innerHTML;
+      if (sel === '≡' || sel === 'x') {
+        let sel = document.querySelector('.calc-mem-storage')
+        let condi = sel !== null;
+        setMenuIcon((prev) => (prev === '≡' && condi) ? 'x' : '≡');
+        if (condi) return sel.classList.toggle('visible');
+      }
     }
 
     const handleNumberClick = (num, e) => {
@@ -167,6 +188,31 @@ export default function App() {
   }, [calcDisp, calcMem, calcOp, delKey, saveIco, calcStorage, calcMemCount]);
 
   useEffect(() => {
+    const handleKey = (e) => {
+      console.log(e)
+      const data = e.target.dataset;
+      const type = data.type;
+      const parent = data.idparent;
+      const index = data.index;
+      const inner = e.target.innerHTML;
+      
+      if (e.key === 'Enter') {
+        e.target.setAttribute('contenteditable', false);
+        if (type === 'header') {
+          console.log(calcStorage[parent]['name'])
+          calcStorage[parent]['name'] = inner
+        }
+      }
+    }
+    const sel = document.querySelector('.container');
+    sel.addEventListener('keydown', handleKey);
+
+    return () => {
+      sel.removeEventListener('keydown', handleKey)
+    }
+  })
+
+  useEffect(() => {
     console.log(calcStorage);
   }, [calcStorage]);
 
@@ -225,8 +271,8 @@ const CalcMemory = ( { calcGenStorage } ) => {
           <div className='storage-item' key={key} id={key}>
             <div>
               <h3>
-                <span data-type="header" data-idparent={key} className="editable">{ name }</span> 
-                <button className="delete-mem">x</button>
+                <span className="editable" data-type="header" data-idparent={key}>{ name }</span> 
+                <button className="delete-mem" data-type="deleteButton" data-idparent={key}>x</button>
               </h3>
             </div>
             {calculation.map((a,b) => {
