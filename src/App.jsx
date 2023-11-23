@@ -1,7 +1,30 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 const operandArr = ["÷", "x", "-", "+"];
-const dataTypes = ['header', 'number', 'comment', 'operator', 'deleteButton'];
+const dataTypes = ['header', 'number', 'comment', 'operator'];
+
+const parseOp = (num1, op, num2) => {
+  num1 = +(num1);
+  num2 = +(num2);
+  if (op === '+') return num1 + num2;
+  if (op === '-') return num1 - num2;
+  if (op === 'x' || op === '*') return num1 * num2;
+  if (op === '÷' || op === '/') return num1 / num2;
+};
+
+const recalc = (arr) => {
+  let temp2 = [].concat(arr);
+  let temp = parseOp(temp2[0], temp2[1], temp2[2]);
+  console.log(temp2);
+  temp2.splice(0,3)
+
+  while(temp2.length > 0 && temp2[0] !== '=') {
+      let cur = temp2.splice(0,2);
+      temp = parseOp(temp, cur[0], cur[1]);
+  }
+  console.log(temp);
+  return temp;
+};
 
 export default function App() {
   const [calcMem, setCalcMem] = useState([]);
@@ -51,7 +74,7 @@ export default function App() {
 
     const handleStorage = (e) => {
       let dataT = e.target.dataset.type;
-      if (dataT === 'header') {
+      if (dataTypes.includes(dataT)) {
         selectMe(e)
       }
     }
@@ -138,29 +161,6 @@ export default function App() {
       }
     };
 
-    const parseOp = (num1, op, num2) => {
-      num1 = +(num1);
-      num2 = +(num2);
-      if (op === '+') return num1 + num2;
-      if (op === '-') return num1 - num2;
-      if (op === 'x' || op === '*') return num1 * num2;
-      if (op === '÷' || op === '/') return num1 / num2;
-    };
-
-    const recalc = (arr) => {
-      let temp2 = [].concat(arr);
-      let temp = parseOp(temp2[0], temp2[1], temp2[2]);
-      console.log(temp2);
-      temp2.splice(0,3)
-  
-      while(temp2.length > 0 && temp2[0] !== '=') {
-          let cur = temp2.splice(0,2);
-          temp = parseOp(temp, cur[0], cur[1]);
-      }
-      console.log(temp);
-      return temp;
-    };
-
     const saveCalc = () => {
       let name = `calc_${calcMemCount}`;
       let newCalc = calcMem.map(a => (typeof +(a) == 'number' && !isNaN(a)) ? +(a) : a);
@@ -187,9 +187,9 @@ export default function App() {
     
   }, [calcDisp, calcMem, calcOp, delKey, saveIco, calcStorage, calcMemCount]);
 
+  // handle KEYDOWNS
   useEffect(() => {
     const handleKey = (e) => {
-      console.log(e)
       const data = e.target.dataset;
       const type = data.type;
       const parent = data.idparent;
@@ -198,19 +198,40 @@ export default function App() {
       
       if (e.key === 'Enter') {
         e.target.setAttribute('contenteditable', false);
+
         if (type === 'header') {
-          console.log(calcStorage[parent]['name'])
-          calcStorage[parent]['name'] = inner
+          console.log(calcStorage[parent]['name']);
+          calcStorage[parent]['name'] = inner;
+        }
+
+        if (type === 'comment') {
+          console.log(calcStorage[parent]['comments'][index]);
+          console.log(calcStorage);
+          calcStorage[parent]['comments'][index] = inner;
+        }
+
+        if (type === 'number') {
+          let thisCalc = calcStorage[parent]['calculation'].map((a,b) => (b == index) ? +(inner) : a);
+          let newObj = {
+            ...calcStorage[parent],
+            calculation: [...thisCalc.slice(0,-1), recalc(thisCalc)]
+          }
+          setCalcStorage((prev) => ({
+            ...prev,
+            [parent]: newObj
+          }))
+          console.log(calcStorage);
         }
       }
-    }
+    };
+
     const sel = document.querySelector('.container');
     sel.addEventListener('keydown', handleKey);
 
     return () => {
       sel.removeEventListener('keydown', handleKey)
     }
-  })
+  }, [calcStorage])
 
   useEffect(() => {
     console.log(calcStorage);

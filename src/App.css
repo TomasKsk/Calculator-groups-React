@@ -175,3 +175,7 @@ h3 {
 .saveIcon {
   font-family: 'wingdings'
 }
+
+.editable {
+  margin-right: 0.5rem;
+}
