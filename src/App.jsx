@@ -65,6 +65,32 @@ export default function App() {
       }
     };
 
+    const reindexKeys = (obj) => {
+      const currKeys = Object.keys(obj);
+      console.log(currKeys)
+      const mapping = currKeys.reduce((acc, key, index) => {
+        const newKey = `calc_${index}`;
+        acc[key] = newKey;
+        return acc;
+      }, {});
+      const updatedObj = Object.fromEntries(
+        Object.entries(obj).map(([oldKey, value]) => {
+          const newKey = mapping[oldKey];
+          const currentName = value.name;
+    
+          // Check if the current name contains 'calc_'
+          const updatedName = currentName.includes('calc_') ? newKey : currentName;
+    
+          const updatedValue = {
+            ...value,
+            name: updatedName,
+          };
+          return [newKey, updatedValue];
+        })
+      );
+      return updatedObj;
+    }
+
     const handleDelete = (e) => {
       let parent = e.target.dataset.idparent;
 
@@ -73,8 +99,11 @@ export default function App() {
       setCalcStorage((prev) => {
         const entries = Object.entries(prev);
         const filtered = entries.filter(([key]) => key !== parent);
-        return Object.fromEntries(filtered);
+        const newObj = Object.fromEntries(filtered);
+        return reindexKeys(newObj)
       });
+      // update the calcMemCount
+      setCalcMemCount(Object.keys(calcStorage).pop().replace(/\D+/, ''))
     };
 
     // remove save icon if there is no 
