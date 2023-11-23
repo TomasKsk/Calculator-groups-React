@@ -41,6 +41,7 @@ export default function App() {
       let num = e.target.innerHTML;
       let numId = e.target.id;
       let dataT = e.target.dataset;
+      let type = e.target.dataset.type;
 
       if (dataT.type) {
         handleStorage(e);
@@ -59,7 +60,21 @@ export default function App() {
         saveCalc();
       } else if (numId === 'menu-icon-place') {
         handleMenu(e);
-      } 
+      } else if (type == 'deleteButton') {
+        handleDelete(e);
+      }
+    };
+
+    const handleDelete = (e) => {
+      let parent = e.target.dataset.idparent;
+
+      // use object entries to create an array and an object to easilly filter out the desired id. 
+      // then use the function Object.fromEntries to convert back to object.
+      setCalcStorage((prev) => {
+        const entries = Object.entries(prev);
+        const filtered = entries.filter(([key]) => key !== parent);
+        return Object.fromEntries(filtered);
+      });
     };
 
     // remove save icon if there is no 
