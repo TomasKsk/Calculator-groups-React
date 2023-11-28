@@ -3,6 +3,8 @@ import './App.css'
 const operandArr = ["÷", "x", "-", "+"];
 const dataTypes = ['header', 'number', 'comment', 'operator'];
 
+
+
 const parseOp = (num1, op, num2) => {
   num1 = +(num1);
   num2 = +(num2);
@@ -28,13 +30,17 @@ const recalc = (arr) => {
 
 export default function App() {
   const [calcMem, setCalcMem] = useState([]);
-  const [calcStorage, setCalcStorage] = useState({});
   const [calcMemCount, setCalcMemCount] = useState(0);
   const [menuIcon, setMenuIcon] = useState('≡');
   const [saveIco, setSaveIco] = useState('');
   const [calcDisp, setCalcDisp] = useState('');
   const [calcOp, setCalcOp] = useState('');
   const [delKey, setDelKey] = useState('C');
+  const [calcStorage, setCalcStorage] = useState(() => {
+    // check if local storage exists and return the saved object
+    const item = localStorage.getItem('Calc_save');
+    return JSON.parse(item) || {};
+  });
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -60,10 +66,31 @@ export default function App() {
         saveCalc();
       } else if (numId === 'menu-icon-place') {
         handleMenu(e);
-      } else if (type == 'deleteButton') {
+      } else if (type === 'deleteButton') {
         handleDelete(e);
+      } else if (type === 'addNum') {
+        addNum(e);
       }
     };
+
+
+
+    const addNum = (e) => {
+      const key = e.target.dataset.idparent;
+
+      const updatedCalc = [...calcStorage[key]['calculation'].slice(0,-2), '+', 0, ...calcStorage[key]['calculation'].slice(-2)];
+      const updatedComm = [...calcStorage[key]['comments'].slice(0,-2), null, '...', null, null];
+
+      setCalcStorage((prev) => ({
+        ...prev,
+        [key]: {
+          ...prev[key],
+          calculation: updatedCalc,
+          comments: updatedComm
+        }
+      }));
+
+    }
 
     const reindexKeys = (obj) => {
       const currKeys = Object.keys(obj);
@@ -102,8 +129,8 @@ export default function App() {
         const newObj = Object.fromEntries(filtered);
         return reindexKeys(newObj)
       });
-      // update the calcMemCount
-      setCalcMemCount(Object.keys(calcStorage).pop().replace(/\D+/, ''))
+      // update the calcMemCount to the highest number from calcStorage
+      setCalcMemCount(Object.keys(calcStorage).pop().replace(/\D+/, ''));
     };
 
     // remove save icon if there is no 
@@ -219,7 +246,7 @@ export default function App() {
       setCalcMemCount((prev) => prev + 1);
       setSaveIco('');
       setCalcMem([]);
-      setCalcDisp('')
+      setCalcDisp('');
     };
 
     const sel = document.querySelector('.container');
@@ -280,6 +307,12 @@ export default function App() {
   useEffect(() => {
     console.log(calcStorage);
   }, [calcStorage]);
+
+  // Handle local storage
+  // Save to local storage, when calcStorage changes using the useEffect hook
+  useEffect(() => {
+    localStorage.setItem('Calc_save', JSON.stringify(calcStorage));
+  }, [calcStorage])
 
   return (
     <div id="calc-main" className='calc-grid'>
@@ -342,18 +375,31 @@ const CalcMemory = ( { calcGenStorage } ) => {
             </div>
             {calculation.map((a,b) => {
               if (typeof a === 'number') {
-                return (
-                  <div key={b}>
-                    <strong>
-                      <span className="editable" data-type="number" data-idparent={key} data-index={b}>
-                        {a}
+                if (b === calculation.length - 1) {
+                  return (
+                    <div key={b}>
+                      <strong>
+                        <span data-type="number" data-idparent={key} data-index={b}>
+                          {a}
+                        </span>
+                      </strong>
+                      <button data-type="addNum" data-index={b} data-idparent={key}>Add</button>
+                    </div>
+                  )
+                } else {
+                  return (
+                    <div key={b}>
+                      <strong>
+                        <span className="editable" data-type="number" data-idparent={key} data-index={b}>
+                          {a}
+                        </span>
+                      </strong>
+                      <span className="editable" data-type="comment" data-idparent={key} data-index={b}>
+                        {comments[b]}
                       </span>
-                    </strong>
-                    <span className="editable" data-type="comment" data-idparent={key} data-index={b}>
-                      {comments[b]}
-                    </span>
-                  </div>
-                )
+                    </div>
+                  )
+                }
               } else {
                 return (
                 <span key={b} className="editable" data-type="operator" data-idparent={key} data-index={b}>
