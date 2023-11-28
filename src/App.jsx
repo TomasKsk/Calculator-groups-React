@@ -30,7 +30,6 @@ const recalc = (arr) => {
 
 export default function App() {
   const [calcMem, setCalcMem] = useState([]);
-  const [calcMemCount, setCalcMemCount] = useState(0);
   const [menuIcon, setMenuIcon] = useState('≡');
   const [saveIco, setSaveIco] = useState('');
   const [calcDisp, setCalcDisp] = useState('');
@@ -40,6 +39,9 @@ export default function App() {
     // check if local storage exists and return the saved object
     const item = localStorage.getItem('Calc_save');
     return JSON.parse(item) || {};
+  });
+  const [calcMemCount, setCalcMemCount] = useState(() => {
+    return (Object.keys(calcStorage).length > 0) ? +(Object.keys(calcStorage)[Object.keys(calcStorage).length - 1].match(/\d+/)[0]) + 1 : 0
   });
 
   useEffect(() => {
