@@ -3,8 +3,6 @@ import './App.css'
 const operandArr = ["÷", "x", "-", "+"];
 const dataTypes = ['header', 'number', 'comment', 'operator'];
 
-
-
 const parseOp = (num1, op, num2) => {
   num1 = +(num1);
   num2 = +(num2);
@@ -35,11 +33,14 @@ export default function App() {
   const [calcDisp, setCalcDisp] = useState('');
   const [calcOp, setCalcOp] = useState('');
   const [delKey, setDelKey] = useState('C');
+  
+  // check if local storage exists and return the saved object
   const [calcStorage, setCalcStorage] = useState(() => {
-    // check if local storage exists and return the saved object
     const item = localStorage.getItem('Calc_save');
     return JSON.parse(item) || {};
   });
+
+  // if saved calculations exist, use the last object Key, extract number with Regex and return it with inc + 1 or 0 if none
   const [calcMemCount, setCalcMemCount] = useState(() => {
     return (Object.keys(calcStorage).length > 0) ? +(Object.keys(calcStorage)[Object.keys(calcStorage).length - 1].match(/\d+/)[0]) + 1 : 0
   });
@@ -363,6 +364,7 @@ const CalcDisplay = ({ calcDisp, calcMem, saveIco, menuIcon }) => {
   )
 }
 
+// eslint-disable-next-line react/prop-types
 const CalcMemory = ( { calcGenStorage } ) => {
   return(
     <div id="calc-mem-storage" className="calc-mem-storage">
@@ -381,7 +383,7 @@ const CalcMemory = ( { calcGenStorage } ) => {
                   return (
                     <div key={b}>
                       <strong>
-                        <span data-type="number" data-idparent={key} data-index={b}>
+                        <span data-idparent={key} data-index={b}>
                           {a}
                         </span>
                       </strong>
@@ -403,11 +405,20 @@ const CalcMemory = ( { calcGenStorage } ) => {
                   )
                 }
               } else {
-                return (
-                <span key={b} className="editable" data-type="operator" data-idparent={key} data-index={b}>
-                  {a}
-                </span>
-                )
+                if (b === calculation.length - 2) {
+                  return (
+                    <span key={b}>
+                      {a}
+                    </span>
+                  )
+                } else {
+                  return (
+                    <span key={b} className="editable" data-type="operator" data-idparent={key} data-index={b}>
+                      {a}
+                    </span>
+                  )
+                }
+                
               }
 
             })}
